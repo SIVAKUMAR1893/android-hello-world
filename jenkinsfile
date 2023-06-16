@@ -1,0 +1,64 @@
+pipeline {
+agent any 
+  
+  stages {
+  
+  stage("create clone"){
+            steps{
+                sh ("echo 'done'")
+            }}
+            
+    stage('Compile') {
+      steps {
+        // Compile the app and its dependencies
+        //sh 'cd /home/ubuntu/Helloworld/HelloWorld-Android'   16-- //--distribution-type all
+        sh 'pwd'
+sh 'gradle --version'
+        //sh 'gradle wrapper --gradle-version 7.0.2'
+        sh 'gradle clean'
+        
+        //sh 'gradle'
+        //sh 'gradle wrapper --gradle-version 6.7.1'
+         // sh './gradlew assembleRelease'
+       // sh './gradlew compileDebugSources'
+    }
+  }
+    stage('Unit test') {
+      steps {
+        // Compile and run the unit tests for the app and its dependencies
+        sh './gradlew test'
+
+        // Analyse the test results and update the build result as appropriate
+        junit 'app/build/test-results/**/*.xml'
+      }
+    }
+    stage('Build APK') {
+      steps {
+        // Finish building and packaging the APK
+        sh './gradlew assembleDev'
+
+        // Archive the APKs so that they can be downloaded from Jenkins
+        archiveArtifacts '**/*.apk'
+      }
+    }
+    stage('Stage Archive') {
+      steps {
+        //tell Jenkins to archive the apks
+        archiveArtifacts artifacts: 'app/build/outputs/apk/*.apk', fingerprint: true
+      }
+    }
+    stage('Static analysis') {
+      steps {
+        // Run Lint and analyse the results
+        sh './gradlew lintDebug'
+        androidLint pattern: '**/lint-results-*.xml'
+      }
+    }
+  }
+  post {
+    failure {
+      // Notify developer team of the failure
+      mail to: 'gsivakumar1893@gmail.com', subject: 'Oops!', body: "Build ${env.BUILD_NUMBER} failed; ${env.BUILD_URL}"
+    }
+  }
+}
