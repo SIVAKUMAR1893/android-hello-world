@@ -15,9 +15,10 @@ agent any
         sh 'pwd'
 sh 'gradle --version'
         //sh 'gradle wrapper --gradle-version 7.0.2'
-        sh 'gradle clean'
+        sh 'gradle wrapper'
         
-        //sh 'gradle'
+        //sh 'gradle clean'
+
         //sh 'gradle wrapper --gradle-version 6.7.1'
          // sh './gradlew assembleRelease'
        // sh './gradlew compileDebugSources'
